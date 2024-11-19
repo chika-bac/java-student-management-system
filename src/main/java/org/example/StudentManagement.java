@@ -3,6 +3,7 @@ package org.example;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class StudentManagement {
@@ -15,13 +16,12 @@ public class StudentManagement {
     System.out.print("学生の名前を入力してください: ");
     String studentName = scanner.next();
 
-    int studentScore = 0;
-    boolean isValidInput = false;
-    while (!isValidInput) {
+    int studentScore;
+    while (true) {
       try {
         System.out.print(studentName + "の点数を入力してください:");
         studentScore = scanner.nextInt();
-        isValidInput = true;
+        break;
       } catch (InputMismatchException e) {
         System.out.println("不正な入力です。点数を入力してください。");
         scanner.next();
@@ -57,57 +57,57 @@ public class StudentManagement {
         .findFirst()
         .orElse(null);
 
-    if (targetStudent != null) {
+//    学生が見つからない場合は早期returnで終了
+    if (Objects.isNull(targetStudent)) {
+      System.out.println("該当する学生が見つかりませんでした。");
+      return;
+    }
+
 //  名前と点数を表示
-      System.out.println("名前: " + targetStudent.getName());
-      System.out.println("点数: " + targetStudent.getScore());
+    System.out.println("名前: " + targetStudent.getName());
+    System.out.println("点数: " + targetStudent.getScore());
 
-      int newScore = 0;
-      boolean isValidInput = false;
-      while (!isValidInput) {
-        try {
-          System.out.print("点数を入力してください: ");
-          newScore = scanner.nextInt();
+    int newScore;
+    while (true) {
+      try {
+        System.out.print("点数を入力してください: ");
+        newScore = scanner.nextInt();
+        break;
 
-//          正しい入力時はループを抜ける
-          isValidInput = true;
-        } catch (InputMismatchException e) {
-          System.out.println("不正な入力です。点数を入力してください。");
-          scanner.next();
-        }
+      } catch (InputMismatchException e) {
+        System.out.println("不正な入力です。点数を入力してください。");
+        scanner.next();
       }
+    }
 
 //      点数を更新
-      targetStudent.setScore(newScore);
-      System.out.println("更新後の点数: " + targetStudent.getScore());
-    } else {
-      System.out.println("該当する学生が見つかりませんでした。");
-    }
+    targetStudent.setScore(newScore);
+    System.out.println("更新後の点数: " + targetStudent.getScore());
   }
 
   //  4. 平均点を計算
   public void calcAverage() {
-    if (!studentList.isEmpty()) {
-      double totalScore = 0;
-      for (Student student : studentList) {
-        totalScore += student.getScore();
-      }
-      System.out.println("平均点: " + totalScore / studentList.size() + "点");
-    } else {
+    if (studentList.isEmpty()) {
       System.out.println("学生が登録されていません。");
+      return;
     }
 
+    double totalScore = studentList.stream()
+        .mapToDouble(Student::getScore)
+        .sum();
+    System.out.println("平均点: " + totalScore / studentList.size() + "点");
   }
 
   //  5. 全学生の情報を開示
   public void printAllStudents() {
-    if (!studentList.isEmpty()) {
-      System.out.println("学生一覧:");
-      for (Student student : studentList) {
-        System.out.println(student.getName() + ": " + student.getScore() + "点");
-      }
-    } else {
+    if (studentList.isEmpty()) {
       System.out.println("学生が登録されていません。");
+      return;
     }
+
+    System.out.println("学生一覧:");
+    studentList.stream()
+        .map(student -> student.getName() + ": " + student.getScore() + "点")
+        .forEach(System.out::println);
   }
 }
